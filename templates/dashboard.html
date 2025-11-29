@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard | Expense Tracker{% endblock %}
+
+{% block content %}
+<div class="text-center">
+    <h2>Welcome, {{ request.user.username }}!</h2>
+    <p class="lead mt-3">
+        This is your dashboard. Only logged-in users can see this.
+    </p>
+
+    <a href="{% url 'logout' %}" class="btn btn-danger mt-3">Logout</a>
+</div>
+{% endblock %}
