@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container" style="max-width:700px; margin-top:2rem;">
+  <h2>Add Transaction</h2>
+
+  {% if user.is_authenticated %}
+    <form method="post" novalidate>
+      {% csrf_token %}
+      {{ form.non_field_errors }}
+      <div class="mb-3">
+        {{ form.amount.label_tag }}<br>
+        {{ form.amount }}
+        {{ form.amount.errors }}
+      </div>
+
+      <div class="mb-3">
+        {{ form.type.label_tag }}<br>
+        {{ form.type }}
+        {{ form.type.errors }}
+      </div>
+
+      <div class="mb-3">
+        {{ form.category.label_tag }}<br>
+        {{ form.category }}
+        {{ form.category.errors }}
+      </div>
+
+      <div class="mb-3">
+        {{ form.description.label_tag }}<br>
+        {{ form.description }}
+        {{ form.description.errors }}
+      </div>
+
+      <div class="mb-3">
+        {{ form.date.label_tag }}<br>
+        {{ form.date }}
+        {{ form.date.errors }}
+      </div>
+
+      <button type="submit" class="btn btn-primary">Add Transaction</button>
+    </form>
+  {% else %}
+    <p>Please <a href="{% url 'login' %}">log in</a> to add transactions.</p>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Your Transactions</h2>
+<table class="table">
+  <thead>
+    <tr>
+      <th>Date</th><th>Type</th><th>Amount</th><th>Category</th><th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for tx in object_list %}
+    <tr>
+      <td>{{ tx.date }}</td>
+      <td>{{ tx.get_type_display }}</td>
+      <td>{{ tx.amount }}</td>
+      <td>
+        {% if tx.category %}
+          {{ tx.category.name }}
+        {% else %}
+          — <!-- you can put "Uncategorized" or blank -->
+        {% endif %}
+      </td>
+      <td>{{ tx.description|linebreaksbr }}</td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="5">No transactions yet.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+{% if is_paginated %}
+  <div>
+    {% if page_obj.has_previous %}<a href="?page={{ page_obj.previous_page_number }}">Previous</a>{% endif %}
+    Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+    {% if page_obj.has_next %}<a href="?page={{ page_obj.next_page_number }}">Next</a>{% endif %}
+  </div>
+{% endif %}
+{% endblock %}
