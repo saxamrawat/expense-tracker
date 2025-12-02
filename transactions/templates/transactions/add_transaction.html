@@ -1,44 +1,52 @@
 {% extends "base.html" %}
 {% block content %}
 <div class="container" style="max-width:700px; margin-top:2rem;">
-  <h2>Add Transaction</h2>
+  
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Add Transaction</h2>
+    <a href="{% url 'transactions:list' %}" class="btn btn-secondary btn-sm">
+      ← Back to Transactions
+    </a>
+  </div>
 
   {% if user.is_authenticated %}
     <form method="post" novalidate>
       {% csrf_token %}
       {{ form.non_field_errors }}
+
       <div class="mb-3">
-        {{ form.amount.label_tag }}<br>
+        {{ form.amount.label_tag }}
         {{ form.amount }}
         {{ form.amount.errors }}
       </div>
 
       <div class="mb-3">
-        {{ form.type.label_tag }}<br>
+        {{ form.type.label_tag }}
         {{ form.type }}
         {{ form.type.errors }}
       </div>
 
       <div class="mb-3">
-        {{ form.category.label_tag }}<br>
+        {{ form.category.label_tag }}
         {{ form.category }}
         {{ form.category.errors }}
       </div>
 
       <div class="mb-3">
-        {{ form.description.label_tag }}<br>
+        {{ form.description.label_tag }}
         {{ form.description }}
         {{ form.description.errors }}
       </div>
 
       <div class="mb-3">
-        {{ form.date.label_tag }}<br>
+        {{ form.date.label_tag }}
         {{ form.date }}
         {{ form.date.errors }}
       </div>
 
       <button type="submit" class="btn btn-primary">Add Transaction</button>
     </form>
+
   {% else %}
     <p>Please <a href="{% url 'login' %}">log in</a> to add transactions.</p>
   {% endif %}

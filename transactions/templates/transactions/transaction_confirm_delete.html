@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container" style="max-width:700px; margin-top:2rem;">
+  <h2>Delete transaction</h2>
+  <p>Are you sure you want to delete this transaction?</p>
+
+  <dl class="row">
+    <dt class="col-sm-3">Date</dt><dd class="col-sm-9">{{ transaction.date }}</dd>
+    <dt class="col-sm-3">Category</dt>
+    <dd class="col-sm-9">{% if transaction.category %}{{ transaction.category.name }}{% else %}<em>Uncategorized</em>{% endif %}</dd>
+    <dt class="col-sm-3">Amount</dt><dd class="col-sm-9">{{ transaction.amount }}</dd>
+    <dt class="col-sm-3">Description</dt><dd class="col-sm-9">{{ transaction.description|default:"—" }}</dd>
+  </dl>
+
+  <form method="post">
+    {% csrf_token %}
+    <a class="btn btn-secondary" href="{% url 'transactions:list' %}">Cancel</a>
+    <button type="submit" class="btn btn-danger">Yes, delete</button>
+  </form>
+</div>
+{% endblock %}

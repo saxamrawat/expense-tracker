@@ -1,38 +1,115 @@
 {% extends "base.html" %}
 {% block content %}
-<h2>Your Transactions</h2>
-<table class="table">
-  <thead>
-    <tr>
-      <th>Date</th><th>Type</th><th>Amount</th><th>Category</th><th>Description</th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for tx in object_list %}
-    <tr>
-      <td>{{ tx.date }}</td>
-      <td>{{ tx.get_type_display }}</td>
-      <td>{{ tx.amount }}</td>
-      <td>
-        {% if tx.category %}
-          {{ tx.category.name }}
-        {% else %}
-          — <!-- you can put "Uncategorized" or blank -->
-        {% endif %}
-      </td>
-      <td>{{ tx.description|linebreaksbr }}</td>
-    </tr>
-    {% empty %}
-    <tr><td colspan="5">No transactions yet.</td></tr>
-    {% endfor %}
-  </tbody>
-</table>
+<div class="container" style="max-width:900px; margin-top:2rem;">
 
-{% if is_paginated %}
-  <div>
-    {% if page_obj.has_previous %}<a href="?page={{ page_obj.previous_page_number }}">Previous</a>{% endif %}
-    Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
-    {% if page_obj.has_next %}<a href="?page={{ page_obj.next_page_number }}">Next</a>{% endif %}
+  <!-- Header -->
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Your Transactions</h2>
+    <a class="btn btn-primary" href="{% url 'transactions:add' %}">Add transaction</a>
   </div>
-{% endif %}
+
+  <!-- FILTER: Month Dropdown -->
+  <form method="get" class="mb-4 d-flex align-items-center">
+    <label class="me-2 fw-semibold">Filter by month:</label>
+    
+    <select name="month" class="form-select me-2" style="width:220px;">
+      <option value="">All months</option>
+      {% for month in month_options %}
+        {# month is a 2-tuple: (value, display_label) #}
+        <option value="{{ month.0 }}" {% if month.0 == selected_month %}selected{% endif %}>
+          {{ month.1 }}
+        </option>
+      {% endfor %}
+    </select>
+
+    <button type="submit" class="btn btn-outline-primary btn-sm">Filter</button>
+
+    {% if selected_month %}
+      <a class="btn btn-link btn-sm ms-2" href="{% url 'transactions:list' %}">Clear</a>
+    {% endif %}
+  </form>
+
+  <!-- TABLE -->
+  {% if transactions %}
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th style="width:120px;">Date</th>
+          <th>Category</th>
+          <th style="width:140px; text-align:right;">Amount</th>
+          <th>Description</th>
+          <th style="width:120px;">Actions</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        {% for tx in transactions %}
+        <tr>
+          <td>{{ tx.date }}</td>
+
+          <td>
+            {% if tx.category %}
+              {{ tx.category.name }}
+            {% else %}
+              <em>Uncategorized</em>
+            {% endif %}
+          </td>
+
+          <td style="text-align:right;">
+            {% if tx.type == "IN" %}
+              +{{ tx.amount }}
+            {% else %}
+              -{{ tx.amount }}
+            {% endif %}
+          </td>
+
+          <td>{{ tx.description|default:"—" }}</td>
+
+          <td>
+            <a class="btn btn-sm btn-outline-danger"
+               href="{% url 'transactions:delete' tx.pk %}">
+              Delete
+            </a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <!-- PAGINATION -->
+    {% if is_paginated %}
+      <nav aria-label="Page navigation">
+        <ul class="pagination">
+          {% if page_obj.has_previous %}
+            <li class="page-item">
+              <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if selected_month %}&month={{ selected_month }}{% endif %}">
+                Previous
+              </a>
+            </li>
+          {% endif %}
+
+          <li class="page-item disabled">
+            <span class="page-link">
+              Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+            </span>
+          </li>
+
+          {% if page_obj.has_next %}
+            <li class="page-item">
+              <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if selected_month %}&month={{ selected_month }}{% endif %}">
+                Next
+              </a>
+            </li>
+          {% endif %}
+        </ul>
+      </nav>
+    {% endif %}
+
+  {% else %}
+    <p>No transactions yet.
+      <a href="{% url 'transactions:add' %}">Add your first transaction</a>.
+    </p>
+  {% endif %}
+
+</div>
 {% endblock %}
