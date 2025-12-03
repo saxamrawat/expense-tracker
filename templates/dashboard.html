@@ -1,15 +1,85 @@
-{% extends 'base.html' %}
-
-{% block title %}Dashboard | Expense Tracker
-{% endblock %}
+{% extends "base.html" %}
+{% block title %}Dashboard — Expense Tracker{% endblock %}
 
 {% block content %}
-<div class="text-center">
-    <h2>Welcome, {{ request.user.username }}!</h2>
-    <p class="lead mt-3">
-        This is your dashboard. Only logged-in users can see this.
-    </p>
+<div class="container" style="max-width:1000px; margin-top:1rem;">
 
-    <a href="{% url 'logout' %}" class="btn btn-danger mt-3">Logout</a>
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Dashboard</h2>
+    <a class="btn btn-primary" href="{% url 'transactions:add' %}">+ Add Transaction</a>
+  </div>
+
+  <!-- Summary cards -->
+  <div class="row mb-4">
+    <div class="col-md-4">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <h6 class="card-subtitle mb-2 text-muted">Total Income</h6>
+          <h3 class="card-title">{{ total_income }}</h3>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <h6 class="card-subtitle mb-2 text-muted">Total Expenses</h6>
+          <h3 class="card-title text-danger">-{{ total_expense }}</h3>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <h6 class="card-subtitle mb-2 text-muted">Net Savings</h6>
+          <h3 class="card-title">{{ net_savings }}</h3>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent transactions -->
+  <div class="card">
+    <div class="card-header">
+      <strong>Recent Transactions</strong>
+      <a class="btn btn-sm btn-link float-end" href="{% url 'transactions:list' %}">View all</a>
+    </div>
+    <div class="card-body p-0">
+      {% if recent_transactions %}
+        <table class="table mb-0">
+          <thead>
+            <tr>
+              <th style="width:130px">Date</th>
+              <th>Category</th>
+              <th style="width:140px; text-align:right;">Amount</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for tx in recent_transactions %}
+            <tr>
+              <td>{{ tx.date }}</td>
+              <td>{% if tx.category %}{{ tx.category.name }}{% else %}<em>Uncategorized</em>{% endif %}</td>
+              <td style="text-align:right;">
+                {% if tx.type == "IN" %}
+                  +{{ tx.amount }}
+                {% else %}
+                  -{{ tx.amount }}
+                {% endif %}
+              </td>
+              <td>{{ tx.description|default:"—" }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% else %}
+        <div class="p-3">
+          <p class="mb-0">No transactions yet. <a href="{% url 'transactions:add' %}">Add your first transaction</a>.</p>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
 </div>
 {% endblock %}
