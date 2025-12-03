@@ -1,9 +1,13 @@
 # categories/views.py
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView, DetailView
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib import messages
 from django.urls import reverse_lazy
+from django.shortcuts import redirect
+from django.db.models import Q
 from .models import Category
 from .forms import CategoryForm
+from transactions.models import Transaction
 
 class CategoryListView(LoginRequiredMixin, ListView):
     model = Category
@@ -12,8 +16,13 @@ class CategoryListView(LoginRequiredMixin, ListView):
     paginate_by = 20
 
     def get_queryset(self):
-        # Only return categories that belong to the logged-in user
-        return Category.objects.filter(user=self.request.user).order_by("-created_at")
+        """
+        Show categories that belong to the user OR global categories (user is NULL).
+        Order user categories first, then global ones (optional).
+        """
+        qs = Category.objects.filter(Q(user=self.request.user) | Q(user__isnull=True)).order_by("-created_at")
+        return qs
+
 
 class CategoryDetailView(LoginRequiredMixin, DetailView):
     model = Category
@@ -53,3 +62,16 @@ class CategoryDeleteView(LoginRequiredMixin, DeleteView):
     def get_queryset(self):
         # only allow deletion of categories owned by the request.user
         return Category.objects.filter(user=self.request.user)
+
+    def post(self, request, *args, **kwargs):
+        """
+        Override POST so we can check for related Transactions and refuse deletion
+        with a friendly message + redirect if any exist.
+        """
+        self.object = self.get_object()
+        # Check whether any transactions reference this category
+        uses = Transaction.objects.filter(category=self.object).exists()
+        if uses:
+            messages.error(request, "Cannot delete this category because it is used by one or more transactions.")
+            return redirect(self.success_url)
+        return super().post(request, *args, **kwargs)
