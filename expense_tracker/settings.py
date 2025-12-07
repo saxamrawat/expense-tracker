@@ -53,7 +53,7 @@ MIDDLEWARE = [
 ]
 
 LOGIN_URL = "/accounts/login/"
-LOGIN_REDIRECT_URL = "/dashboard/"
+LOGIN_REDIRECT_URL = "/"
 
 ROOT_URLCONF = "expense_tracker.urls"
 

@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% block title %}Monthly Report — Expense Tracker{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width:1000px; margin-top:1rem;">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Monthly Report: {{ selected_month }}</h2>
+    <div>
+      <a class="btn btn-outline-primary me-2" href="{% url 'dashboard' %}">Back to Dashboard</a>
+      <a class="btn btn-primary" href="{% url 'transactions:add' %}">+ Add Transaction</a>
+    </div>
+  </div>
+
+  <!-- month selector -->
+  <form method="get" class="mb-3 d-flex align-items-center">
+    <label class="me-2">Month:</label>
+    <select name="month" class="form-select me-2" style="width:200px;">
+      {% for m in month_options %}
+        <option value="{{ m.0 }}" {% if m.0 == selected_month %}selected{% endif %}>{{ m.1 }}</option>
+      {% endfor %}
+    </select>
+    <button class="btn btn-outline-primary btn-sm" type="submit">Show</button>
+  </form>
+
+  <!-- Summary -->
+  <div class="row mb-4">
+    <div class="col-md-4">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <h6 class="card-subtitle mb-2 text-muted">Total Income</h6>
+          <h3 class="card-title">{{ total_income }}</h3>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <h6 class="card-subtitle mb-2 text-muted">Total Expense</h6>
+          <h3 class="card-title text-danger">-{{ total_expense }}</h3>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <h6 class="card-subtitle mb-2 text-muted">Net</h6>
+          <h3 class="card-title">{{ net }}</h3>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Category breakdown -->
+  <div class="card mb-4">
+    <div class="card-header">
+      <strong>Category-wise Breakdown</strong>
+    </div>
+
+    <div class="card-body p-0">
+      {% if breakdown %}
+        <table class="table mb-0">
+          <thead>
+            <tr>
+              <th>Category</th>
+              <th style="text-align:right;">Income</th>
+              <th style="text-align:right;">Expense</th>
+              <th style="width:140px; text-align:right;">Expense %</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in breakdown %}
+            <tr>
+              <td>
+                {% if row.category_id %}
+                  <a href="{% url 'categories:detail' row.category_id %}">{{ row.category_name }}</a>
+                {% else %}
+                  {{ row.category_name }}
+                {% endif %}
+              </td>
+              <td style="text-align:right;">{{ row.income }}</td>
+              <td style="text-align:right; color: #c23d3d;">-{{ row.expense }}</td>
+              <td style="text-align:right;">{{ row.expense_share_pct }}%</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% else %}
+        <div class="p-3">
+          <p class="mb-0">No transactions in this month.</p>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}
