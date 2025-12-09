@@ -2,8 +2,13 @@ from django.urls import reverse_lazy
 from django.shortcuts import get_object_or_404
 from django.views.generic import CreateView, ListView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.decorators import login_required
 from django.utils import timezone
+from django.http import HttpResponse
+import csv
+from decimal import Decimal
 from datetime import datetime
+
 from .models import Transaction
 from .forms import TransactionForm
 
@@ -87,3 +92,54 @@ class TransactionDeleteView(LoginRequiredMixin, DeleteView):
 
     def get_queryset(self):
         return Transaction.objects.filter(user=self.request.user)
+
+@login_required
+def export_transactions_csv(request):
+    """
+    Export transactions for the logged-in user as CSV.
+    Accepts optional GET param `month=YYYY-MM` to filter by month.
+    """
+    qs = Transaction.objects.filter(user=request.user)
+
+    # preserve same month filtering behavior as the list view
+    month_param = request.GET.get("month", "").strip()
+    if month_param:
+        try:
+            parsed = datetime.strptime(month_param, "%Y-%m")
+            year = parsed.year
+            month = parsed.month
+            qs = qs.filter(date__year=year, date__month=month)
+            filename_suffix = f"{year:04d}{month:02d}"
+        except ValueError:
+            # ignore invalid month formats
+            filename_suffix = "all"
+    else:
+        filename_suffix = "all"
+
+    qs = qs.order_by("-date", "-id")
+
+    # Create HTTP response with CSV header, include UTF-8 BOM so Excel recognizes UTF-8
+    response = HttpResponse(content_type="text/csv; charset=utf-8")
+    response["Content-Disposition"] = f'attachment; filename="transactions-{filename_suffix}.csv"'
+
+    # Write BOM for Excel compatibility
+    response.write("\ufeff")
+
+    writer = csv.writer(response)
+    # header row
+    writer.writerow(["date", "category", "amount", "description", "type"])
+
+    for tx in qs:
+        # format date as ISO date (YYYY-MM-DD)
+        try:
+            date_str = tx.date.isoformat()
+        except Exception:
+            date_str = str(tx.date)
+        category = tx.category.name if tx.category else ""
+        # amount should already be Decimal/number
+        amt = tx.amount if tx.amount is not None else ""
+        description = tx.description or ""
+        ttype = tx.type or ""
+        writer.writerow([date_str, category, amt, description, ttype])
+
+    return response

@@ -3,9 +3,17 @@
 <div class="container" style="max-width:900px; margin-top:2rem;">
 
   <!-- Header -->
-  <div class="d-flex justify-content-between align-items-center mb-3">
+    <div class="d-flex justify-content-between align-items-center mb-3">
     <h2>Your Transactions</h2>
-    <a class="btn btn-primary" href="{% url 'transactions:add' %}">Add transaction</a>
+    <div>
+      <a class="btn btn-primary me-2" href="{% url 'transactions:add' %}">Add transaction</a>
+
+      {# Download CSV: preserve selected_month if present #}
+      <a class="btn btn-outline-secondary"
+         href="{% url 'transactions:export_csv' %}{% if selected_month %}?month={{ selected_month }}{% endif %}">
+        Download CSV
+      </a>
+    </div>
   </div>
 
   <!-- FILTER: Month Dropdown -->
