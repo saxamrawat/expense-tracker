@@ -70,3 +70,38 @@ Follow these steps to run the project locally:
 ```bash
 git clone https://github.com/saxamrawat/expense-tracker.git
 cd expense-tracker
+```
+
+### 2️⃣ Create & activate a virtual environment
+
+Windows:
+```
+python -m venv venv
+venv\Scripts\activate
+```
+
+
+Mac/Linux:
+```
+python3 -m venv venv
+source venv/bin/activate
+```
+
+### 3️⃣ Install dependencies
+```
+pip install -r requirements.txt
+```
+
+### 4️⃣ Apply migrations
+```
+python manage.py migrate
+```
+
+### 5️⃣ Run the development server
+
+```
+python manage.py runserver
+```
+
+### Visit:
+👉 https://expense-tracker-jwtd.onrender.com/
